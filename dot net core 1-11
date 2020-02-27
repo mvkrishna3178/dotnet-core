@@ -1,0 +1,137 @@
+
+
+Asp.netCore:
+
+Asp.net core is cross platform, high performance, open source framework for building modern, internet-connected applications.
+It is redesign of asp.net 4.x
+
+Benfits:
+
+1.Crossplatform: Asp.net applications can be developed and run across differnent platforms like windows,macOs, Linux.
+2.Asp.net can host only in IIS but .net core can host in IIS,Apache, docker.
+3.It has built in support for Dependency Injection.
+4.One uniform programming Model for MVC and Web Api
+  i.e both MVC controller and Asp.net Web Api controller class  inherit from  the same Controller base class and returns IActionResult.
+  IAction result has two methods 'View Result' and 'JsonResult'.
+5.Core provides modularity with middileware components.
+  i.e Both request and  response piplines are composed using middleware components.
+6.we can edit csproj file without unload from solution in dotnet core
+7.If we add any files or folder to project, the references will not add to csproj file.
+
+
+dot net core initially starts with console application.
+
+***CreateWebHostBuilder is used to build(using build()) and Run(using Run()) the application.
+   CreateWebHostBuilder(args).Build().Run();
+
+WebHost.CreateDefaultBulder method sets up the web host that hosts our 	application with pre configured defaults.
+as part of setting up the webhost this createdefaultbuilder does several tasks
+ i.settingup the web server
+ ii.loading host and application configuration from various configuration sources
+ iii.configuring logging
+
+An Asp.net core application can be hosted as
+ i) inprocess
+ ii) outOfProcess	
+
+<AspNetCoreHostingModel>InProcess</AspNetCoreHostinModel>
+**If we don't mention <AspNetCoreHostingModel> by default it will use "outofprocess" hosting
+
+IISExpress: A light weight self contained version of IIS optimized for especially for developing applications.
+we do not use iisexperess in production. In production we use IIS.
+
+with Inprocess hosting we have only one web server that is IIS.
+"with Inprocess hosting application  is hosted inside the IIS server with worker process as w3wp.exe."
+by default visual studio will run using iisexpress.
+by the performance standpoint inprocess hosting is better than outprocess hosting.	
+
+with outofProcess hosting 2 web servers involved one is internal web server(Krestel) other is external webserver(Reverse proxy).
+"with outofprocess hosting application  is hosted inside the Kestrel server with worker process as w3wp.exe(IIS) or iisexpress.exe(IISExpress)."
+internal web server is 'Kestrel'
+external web server maybe IIS, NgInx or Apache
+
+Kestrel: is a Cross platform web server for asp.net core.
+Kestrel can process HTTP requests in 2 ways.
+1.Kestrel can be used as an edge server that is internet face webserver that can directly  process incoming HTTP requests	from the client.
+2.Kestrel can use combination with a 'Reverse Proxy Server' such as IIS,ngInx,or Apache.In this model of hosting Kestrel is
+not facing the internet.between internt and Kestrel used Reverse proxy Server.
+
+Kestrel is a web server the why we need another Server?
+Ans:Reverse proxy server such as IIS provides an additional layer of configuration and security it might integrates better with our existing
+infrastructure, it can also use for load balancing.
+
+As we know VS will default run as IISExpress(light weight version of IIS) that means IIS will works as reverse proxy here.
+
+
+
+The process used to host the app is dotnet.exe
+dot net core application will executed using kestrel server when it run using .netcore cli.
+
+
+launchSettings.json file is only used for development mechine not need it for publishing.
+If there are certain settings that we want our application to use when we publish and deploy our app  store those settings in
+this file.
+
+
+in asp.net we have web.config file to setup configuration settings like databse connection strings.
+in asp.net core has different cofiguration sources
+ a)Files(appsettings.json, appsettings.{Environment}.json)
+ b)user secrets
+ c)environmennt variables 	
+ d)command line arguments
+n
+To get or access data in configuration information in appsetings.json
+we use IConfigurationService.
+
+if we have an environment(Ex: appsettings.development.json) specific appsettings file the settings in that file will override the settings in the general appsettings.json
+
+in asp.net to configure DI we have to use external frameworks such as ninject, structure map etc.
+in asp.net DI is an integral part.
+DI is allows us to create systems that looseley coupled, extensible and easily testable.
+
+MiddleWare: It is a piece of software that can handle an HTTP request or response.
+middleware may process incoming request or without processesing it pass that request to next piece of middleware in the pipline for further processing.
+ex: we may have middleware of a component that authenticate user, another middleware handle error and another middleware serves static files such as javascript, css and image files
+Middlware used to setup a request processing pipeline.
+Based on our requirement we have to maintain middware component order correctly in request processing pipline like logging,static files,authentication,mvc middleware components.
+configure method is used to setup a request processig pipeline.
+
+if(env.Development()){
+app.UseDeveloperExceptionPage() middleware respond if any exceptions raised and environment is development
+}
+
+app.Run() method will handle response of request.
+
+app.Run(async (context)=>{
+   await context.Response.WriteAsync("Hello World");
+});	
+
+app.Run() middleware is the terminal middleware 
+
+terminal middleware: it is a middleware that does not call next middleware in request pipeline.
+
+if we want to call response middleware we should have 'Use' method
+
+app.Use(context,next)  here 'next' is a func delegate to call next 'response middleware'.
+
+EX:
+
+
+app.Use(async (context,next)=>{
+   await context.Response.WriteAsync("Hello World 1");
+   await next();
+});	
+
+app.Run(async (context)=>{
+   await context.Response.WriteAsync("Hello World 2");
+});	
+
+middleware execution https://www.youtube.com/watch?v=nt6anXAwfYI&list=PL6n9fhu94yhVkdrusLaQsfERmL_Jh4XmU&index=11
+time: 12th minute
+
+Everything that happens 'before the next() method' is invoked in each of the middleware components as the Request  travels from middleware(MW) to MW through the pipeline.
+Everything that happens 'after  the next() method' is invoked in each of the middleware components as the Response travels from middleware(MW) to MW through the pipeline.
+
+
+
+
